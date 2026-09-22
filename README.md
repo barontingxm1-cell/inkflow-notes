@@ -2,9 +2,9 @@
 
 A web app for handwritten and typed notes with:
 - Calligraphy and ballpoint pen drawing modes
-- Addable text boxes for typing anywhere on the page
-- Home screen personalization with image and video wallpaper uploads
-- Multiple wallpaper presets and menu themes
+- Addable text boxes that can be dragged anywhere
+- Home screen personalization with uploaded image and video wallpaper
+- Custom wallpaper presets and menu themes
 - Unlimited note saving in browser storage
 - PDF export for notes
 

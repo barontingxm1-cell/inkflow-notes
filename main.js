@@ -13,6 +13,8 @@ const state = {
 
 let drawing = false;
 let currentStroke = null;
+let draggingTextboxId = null;
+let dragOffset = { x: 0, y: 0 };
 
 const noteListEl = document.getElementById("noteList");
 const currentNoteTitleEl = document.getElementById("currentNoteTitle");
@@ -25,7 +27,7 @@ const wallpaperImageLayer = document.getElementById("wallpaperImageLayer");
 const wallpaperVideo = document.getElementById("wallpaperVideo");
 
 function uid() {
-  return (crypto?.randomUUID?.() ?? "id-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+  return crypto?.randomUUID?.() ?? `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function createDefaultNote() {
@@ -146,13 +148,23 @@ function renderStroke(stroke) {
     for (let i = 1; i < stroke.points.length; i += 1) {
       const prev = stroke.points[i - 1];
       const curr = stroke.points[i];
-      const variation = stroke.size * (0.7 + (i / stroke.points.length) * 1.8);
+      const variation = stroke.size * (0.75 + (i / stroke.points.length) * 1.5);
       canvasCtx.lineWidth = variation;
       canvasCtx.beginPath();
       canvasCtx.moveTo(prev.x, prev.y);
       canvasCtx.lineTo(curr.x, curr.y);
       canvasCtx.stroke();
     }
+  } else if (stroke.tool === "ballpoint") {
+    canvasCtx.beginPath();
+    stroke.points.forEach((point, index) => {
+      if (index === 0) {
+        canvasCtx.moveTo(point.x, point.y);
+      } else {
+        canvasCtx.lineTo(point.x, point.y);
+      }
+    });
+    canvasCtx.stroke();
   } else {
     canvasCtx.beginPath();
     stroke.points.forEach((point, index) => {
@@ -194,11 +206,67 @@ function renderTextBoxes() {
       saveNotes();
     });
 
-    textarea.addEventListener("mousedown", (event) => event.stopPropagation());
-    textarea.addEventListener("touchstart", (event) => event.stopPropagation());
+    textarea.addEventListener("mousedown", (event) => {
+      event.stopPropagation();
+      beginTextboxDrag(event, box.id, textarea);
+    });
+
+    textarea.addEventListener("touchstart", (event) => {
+      event.stopPropagation();
+      beginTextboxDrag(event.touches[0], box.id, textarea);
+    }, { passive: false });
 
     textBoxLayer.appendChild(textarea);
   });
+}
+
+function beginTextboxDrag(event, boxId, element) {
+  const note = getActiveNote();
+  if (!note) return;
+  const box = note.textBoxes.find((item) => item.id === boxId);
+  if (!box) return;
+
+  draggingTextboxId = boxId;
+  const boardRect = boardEl.getBoundingClientRect();
+  const point = {
+    x: event.clientX - boardRect.left,
+    y: event.clientY - boardRect.top,
+  };
+
+  dragOffset = {
+    x: point.x - box.x,
+    y: point.y - box.y,
+  };
+
+  element.setPointerCapture?.(event.pointerId);
+  element.style.zIndex = "20";
+}
+
+function handleTextboxDrag(event) {
+  if (!draggingTextboxId) return;
+
+  const note = getActiveNote();
+  if (!note) return;
+
+  const box = note.textBoxes.find((item) => item.id === draggingTextboxId);
+  if (!box) return;
+
+  const rect = boardEl.getBoundingClientRect();
+  const point = {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top,
+  };
+
+  box.x = Math.max(0, point.x - dragOffset.x);
+  box.y = Math.max(0, point.y - dragOffset.y);
+  note.updatedAt = Date.now();
+  renderTextBoxes();
+  saveNotes();
+}
+
+function stopTextboxDrag() {
+  draggingTextboxId = null;
+  dragOffset = { x: 0, y: 0 };
 }
 
 function renderNoteContent() {
@@ -255,6 +323,10 @@ function getBoardPoint(event) {
 }
 
 function pointerDown(event) {
+  if (draggingTextboxId) {
+    return;
+  }
+
   if (["eraser", "calligraphy", "ballpoint"].includes(state.tool)) {
     const note = getActiveNote();
     if (!note) return;
@@ -275,6 +347,11 @@ function pointerDown(event) {
 }
 
 function pointerMove(event) {
+  if (draggingTextboxId) {
+    handleTextboxDrag(event);
+    return;
+  }
+
   if (!drawing || !currentStroke) return;
 
   const note = getActiveNote();
@@ -287,6 +364,11 @@ function pointerMove(event) {
 }
 
 function pointerUp() {
+  if (draggingTextboxId) {
+    stopTextboxDrag();
+    return;
+  }
+
   drawing = false;
   currentStroke = null;
   saveNotes();
@@ -377,7 +459,7 @@ function exportAsPdf() {
     exportCtx.rotate((box.rotate || 0) * (Math.PI / 180));
     exportCtx.font = `${box.fontSize || 24}px ${box.fontFamily || '"Patrick Hand", cursive'}`;
     exportCtx.fillStyle = box.color || "#121212";
-    exportCtx.fillText(box.text, 0, 30);
+    exportCtx.fillText(box.text || "", 0, 30);
     exportCtx.restore();
   });
 
