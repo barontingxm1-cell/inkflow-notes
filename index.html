@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InkFlow Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">I</div>
+          <div>
+            <h2>InkFlow</h2>
+            <p>Notebook Studio</p>
+          </div>
+        </div>
+
+        <button id="newNoteBtn" class="primary-btn">+ New note</button>
+
+        <nav class="view-tabs">
+          <button class="nav-btn active" data-view="home">Home screen</button>
+          <button class="nav-btn" data-view="notes">Notes</button>
+          <button class="nav-btn" data-view="menu">Menu</button>
+        </nav>
+
+        <div class="notes-section">
+          <div class="section-header">
+            <span>Saved notes</span>
+            <button id="saveNoteBtn" class="mini-btn">Save</button>
+          </div>
+          <div id="noteList" class="note-list"></div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Current note</p>
+            <h1 id="currentNoteTitle">Untitled note</h1>
+          </div>
+
+          <div class="toolbar">
+            <button class="tool-btn active" data-tool="calligraphy">Calligraphy</button>
+            <button class="tool-btn" data-tool="ballpoint">Ballpoint</button>
+            <button class="tool-btn" data-tool="eraser">Eraser</button>
+            <button id="addTextBtn" class="tool-btn">Add text box</button>
+            <input id="colorPicker" type="color" value="#1d1d1f" aria-label="Choose pen color" />
+            <input id="sizeSlider" type="range" min="2" max="20" value="6" aria-label="Pen size" />
+            <button id="exportPdfBtn" class="primary-btn small">Export PDF</button>
+          </div>
+        </header>
+
+        <section id="homeScreen" class="screen-panel active">
+          <div class="screen-header">
+            <div>
+              <p class="eyebrow">Customize</p>
+              <h2>Home screen</h2>
+            </div>
+            <div class="header-actions">
+              <label class="upload-btn"><input id="imageUpload" type="file" accept="image/*" />Image</label>
+              <label class="upload-btn"><input id="videoUpload" type="file" accept="video/*" />Video</label>
+            </div>
+          </div>
+
+          <div class="wallpaper-preview-wrap">
+            <div id="wallpaperFrame" class="wallpaper-frame">
+              <video id="wallpaperVideo" autoplay muted loop playsinline></video>
+              <div id="wallpaperImageLayer" class="wallpaper-image-layer"></div>
+            </div>
+          </div>
+
+          <div class="preset-grid">
+            <button class="preset-btn active" data-preset="paper">Paper</button>
+            <button class="preset-btn" data-preset="forest">Forest</button>
+            <button class="preset-btn" data-preset="night">Night</button>
+            <button class="preset-btn" data-preset="sunset">Sunset</button>
+          </div>
+        </section>
+
+        <section id="notesScreen" class="screen-panel">
+          <div id="boardWrap" class="board-wrap">
+            <div id="board" class="board">
+              <canvas id="drawingCanvas" width="1800" height="1200"></canvas>
+              <div id="textboxLayer" class="textbox-layer"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="menuScreen" class="screen-panel">
+          <div class="menu-shell">
+            <div class="menu-card glass">
+              <div class="section-header compact">
+                <span>Menu screen</span>
+              </div>
+              <div class="menu-item-row">
+                <button class="menu-choice active" data-menu-theme="paper">Paper theme</button>
+                <button class="menu-choice" data-menu-theme="midnight">Midnight</button>
+                <button class="menu-choice" data-menu-theme="forest">Forest</button>
+              </div>
+              <div class="menu-groups">
+                <div class="menu-group">
+                  <h3>Quick notes</h3>
+                  <ul>
+                    <li>Voice memo ideas</li>
+                    <li>Meeting summary</li>
+                    <li>Daily reflection</li>
+                  </ul>
+                </div>
+                <div class="menu-group">
+                  <h3>Favorites</h3>
+                  <ul>
+                    <li>Travel log</li>
+                    <li>Lecture notes</li>
+                    <li>Project plan</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.0/jspdf.umd.min.js"></script>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
